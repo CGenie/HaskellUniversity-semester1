@@ -7,10 +7,9 @@ import Test.QuickCheck.All
 import QuickSort (quicksort)
 
 
-isNondecreasing :: [Int] -> Bool
-isNondecreasing [] = True
-isNondecreasing [x] = True
-isNondecreasing (x:y:ys) = and [x <= y, isNondecreasing (y:ys)]
+ordered :: [Int] -> Bool
+ordered [] = True
+ordered xs = and $ zipWith (<=) xs (drop 1 xs)
 
 
 prop_minHead :: NonEmptyList Int -> Bool
@@ -26,8 +25,8 @@ prop_maxTail xs0 =
 prop_idempotent :: [Int] -> Bool
 prop_idempotent lst = (quicksort $ quicksort lst) == (quicksort lst)
 
-prop_isNondecreasing :: [Int] -> Bool
-prop_isNondecreasing lst = isNondecreasing $ quicksort lst
+prop_ordered :: [Int] -> Bool
+prop_ordered lst = ordered $ quicksort lst
 
 
 -- template haskell magic
