@@ -10,14 +10,38 @@ import Data.Maybe (isJust, fromJust)
 data Product = Apples | Oranges
   deriving (Eq, Show)
 
+type Cart = [Product]
+
 
 cost :: Product -> Double
 cost Apples = 0.60
 cost Oranges = 0.25
 
-checkout :: [Product] -> Double
-checkout [] = 0.0
-checkout (x:xs) = cost x + costAll xs
+checkoutCart :: Cart -> Double
+checkoutCart [] = 0.0
+checkoutCart (x:xs) = cost x + checkoutCart xs
+
+checkout :: Cart -> Double
+checkout cart = checkoutCart cart - (sum [discount cart | discount <- discounts])
+
+discounts :: [Cart -> Double]
+discounts = [
+  apples2for1,
+  oranges3for2
+            ]
+
+
+apples2for1 = productNforMDiscount 2 1 Apples
+oranges3for2 = productNforMDiscount 3 2 Oranges
+
+productNforMDiscount :: Int -> Int -> Product -> Cart -> Double
+productNforMDiscount n m product cart = numDiscounted * (fromIntegral (n - m) :: Double) * (cost product)
+  where
+    numProduct = countProductInCart product cart
+    numDiscounted = fromIntegral $ numProduct `div` n :: Double
+
+countProductInCart :: Product -> Cart -> Int
+countProductInCart product cart = length $ filter (== product) cart
 
 
 shopPromptOne :: IO (Maybe Product)
